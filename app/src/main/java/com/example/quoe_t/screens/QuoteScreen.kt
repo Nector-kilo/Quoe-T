@@ -3,18 +3,20 @@ package com.example.quoe_t.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -41,7 +43,7 @@ fun QuoteScreen(quoetViewModel: QuoetViewModel, onCloseClicked: () -> Unit) {
             )
         },
         bottomBar = {
-            BottomAppBar {
+            BottomAppBar(containerColor = MaterialTheme.colorScheme.background) {
                 Row(
                     horizontalArrangement = Arrangement.Center,
                     modifier = Modifier.fillMaxWidth()
@@ -50,6 +52,7 @@ fun QuoteScreen(quoetViewModel: QuoetViewModel, onCloseClicked: () -> Unit) {
                         onClick = {
                             onCloseClicked()
                         },
+                        shape = RoundedCornerShape(4.dp)
                     ) { Text("New Quote") }
                     //TODO Implement share button.
                 }
@@ -70,7 +73,7 @@ fun QuoteScreen(quoetViewModel: QuoetViewModel, onCloseClicked: () -> Unit) {
                 BillTotalsCard("Monthly Bill Est:", uiState.quote.monthlyBill())
                 BillTotalsCard("One-Time Credit:", uiState.quote.oneTimeBillCredit())
             }
-            Card (
+            OutlinedCard (
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 modifier = Modifier
                     .padding(6.dp)
@@ -82,12 +85,11 @@ fun QuoteScreen(quoetViewModel: QuoetViewModel, onCloseClicked: () -> Unit) {
                 )
                 LazyColumn {
                     itemsIndexed(uiState.listOfLines) { _, line ->
-                        Surface (
-                            shape = MaterialTheme.shapes.medium,
-                            tonalElevation = 1.dp,
+                        Card (
+                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(2.dp)
+                                .fillMaxSize()
+                                .padding(6.dp)
                         ) {
                             Column (
                                 modifier = Modifier.padding(4.dp)
@@ -159,7 +161,7 @@ fun QuoteScreen(quoetViewModel: QuoetViewModel, onCloseClicked: () -> Unit) {
 
 @Composable
 fun BillTotalsCard(text: String, value: Float) {
-    Card (
+    OutlinedCard (
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         modifier = Modifier
             .padding(6.dp)
