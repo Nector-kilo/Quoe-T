@@ -30,15 +30,11 @@ data class LineUiState(
 
 data class NewCxUiState(
     val ratePlan: RatePlan? = null,
-
     val lineCount: String = "",
     val lineCountError: Boolean = false,
-
     val listOfLines: List<Line> = listOf(),
     val listOfLinesUiState: List<LineUiState> = listOf(),
-
     val saveNewCxButtonEnabled: Boolean = false,
-
     val quote: Quote? = null
 )
 
@@ -50,14 +46,12 @@ class NewCxViewModel : ViewModel() {
     val toastMessage: SharedFlow<String> = _toastMessage.asSharedFlow()
 
     private fun emitToast(text: String) {
-        viewModelScope.launch {
-            _toastMessage.emit(text)
-        }
+        viewModelScope.launch { _toastMessage.emit(text) }
     }
 
     fun setRatePlan(newRatePlan: RatePlan) {
-        _uiState.update { currentState ->
-            currentState.copy(ratePlan = newRatePlan)
+        _uiState.update {
+            it.copy(ratePlan = newRatePlan)
         }
     }
 
@@ -73,9 +67,10 @@ class NewCxViewModel : ViewModel() {
                 else -> onLineCountValidationSuccess(newLineCount)
             }
         } catch (_: NumberFormatException) {
-            if (newLineCount != "") {
-                onLineCountValidationFailure(newLineCount, "Must be only numbers.")
-            } else onLineCountValidationFailure(newLineCount, null)
+            if (newLineCount != "") onLineCountValidationFailure(
+                newLineCount,
+                "Must be only numbers."
+            ) else onLineCountValidationFailure(newLineCount, null)
         }
     }
 
@@ -86,8 +81,8 @@ class NewCxViewModel : ViewModel() {
             listOfLines.add(Line(lineNumber = i))
             listOfLineInputStates.add(LineUiState())
         }
-        _uiState.update { currentState ->
-            currentState.copy(
+        _uiState.update {
+            it.copy(
                 lineCount = newLineCount,
                 lineCountError = false,
                 listOfLines = listOfLines,
@@ -98,8 +93,8 @@ class NewCxViewModel : ViewModel() {
 
     private fun onLineCountValidationFailure(newLineCount: String, toastMessage: String?) {
         if (toastMessage != null) emitToast(toastMessage)
-        _uiState.update { currentState ->
-            currentState.copy(
+        _uiState.update {
+            it.copy(
                 lineCount = newLineCount,
                 lineCountError = true,
                 listOfLines = listOf(),
@@ -119,94 +114,74 @@ class NewCxViewModel : ViewModel() {
             hasP360 = currentLineUiState.hasP360,
             isByod = currentLineUiState.isByod
         )
-        if (currentLineUiState.isByod) {
-            mutableListOfLineUiStates[index] = mutableLineUiState.copy(
-                fullDeviceCost = "",
-                promotionAmount = "",
-                fairMarketValue = "",
-                downPayment = ""
+        if (currentLineUiState.isByod) mutableListOfLineUiStates[index] = mutableLineUiState.copy(
+            fullDeviceCost = "",
+            promotionAmount = "",
+            fairMarketValue = "",
+            downPayment = ""
+        ) else {
+            if (currentLineUiState.fullDeviceCost.isNotEmpty()) validateFloatFromString(
+                string = currentLineUiState.fullDeviceCost,
+                onSuccess = { mutableLineUiState = mutableLineUiState.copy(
+                        fullDeviceCostHasError = false
+                    )
+                },
+                onFail = { mutableLineUiState = mutableLineUiState.copy(
+                        fullDeviceCostHasError = true
+                    )
+                }
+            ) else mutableLineUiState = mutableLineUiState.copy(
+                fullDeviceCostHasError = true
             )
-        } else {
-            if (currentLineUiState.fullDeviceCost.isNotEmpty()) {
-                validateFloatFromString(
-                    string = currentLineUiState.fullDeviceCost,
-                    onSuccess = {
-                        mutableLineUiState = mutableLineUiState.copy(
-                            fullDeviceCostHasError = false
-                        )
-                    },
-                    onFail = {
-                        mutableLineUiState = mutableLineUiState.copy(
-                            fullDeviceCostHasError = true
-                        )
-                    }
-                )
-            } else {
-                mutableLineUiState = mutableLineUiState.copy(
-                    fullDeviceCostHasError = true
-                )
-            }
-            if (currentLineUiState.promotionAmount.isNotEmpty()) {
-                validateFloatFromString(
-                    string = currentLineUiState.promotionAmount,
-                    onSuccess = {
-                        mutableLineUiState = mutableLineUiState.copy(
-                            promotionAmountHasError = false
-                        )
-                    },
-                    onFail = {
-                        mutableLineUiState = mutableLineUiState.copy(
-                            promotionAmountHasError = true
-                        )
-                    }
-                )
-            } else {
-                mutableLineUiState = mutableLineUiState.copy(
-                    promotionAmountHasError = false
-                )
-            }
-            if (currentLineUiState.fairMarketValue.isNotEmpty()) {
-                validateFloatFromString(
-                    string = currentLineUiState.fairMarketValue,
-                    onSuccess = {
-                        mutableLineUiState = mutableLineUiState.copy(
-                            fairMarketValueHasError = false
-                        )
-                    },
-                    onFail = {
-                        mutableLineUiState = mutableLineUiState.copy(
-                            fairMarketValueHasError = true
-                        )
-                    }
-                )
-            } else {
-                mutableLineUiState = mutableLineUiState.copy(
-                    fairMarketValueHasError = false
-                )
-            }
-            if (currentLineUiState.downPayment.isNotEmpty()) {
-                validateFloatFromString(
-                    string = currentLineUiState.downPayment,
-                    onSuccess = {
-                        mutableLineUiState = mutableLineUiState.copy(
-                            downPaymentHasError = false
-                        )
-                    },
-                    onFail = {
-                        mutableLineUiState = mutableLineUiState.copy(
-                            downPaymentHasError = true
-                        )
-                    }
-                )
-            } else {
-                mutableLineUiState = mutableLineUiState.copy(
-                    downPaymentHasError = false
-                )
-            }
+            if (currentLineUiState.promotionAmount.isNotEmpty()) validateFloatFromString(
+                string = currentLineUiState.promotionAmount,
+                onSuccess = {
+                    mutableLineUiState = mutableLineUiState.copy(
+                        promotionAmountHasError = false
+                    )
+                },
+                onFail = {
+                    mutableLineUiState = mutableLineUiState.copy(
+                        promotionAmountHasError = true
+                    )
+                }
+            ) else mutableLineUiState = mutableLineUiState.copy(
+                promotionAmountHasError = false
+            )
+            if (currentLineUiState.fairMarketValue.isNotEmpty()) validateFloatFromString(
+                string = currentLineUiState.fairMarketValue,
+                onSuccess = {
+                    mutableLineUiState = mutableLineUiState.copy(
+                        fairMarketValueHasError = false
+                    )
+                },
+                onFail = {
+                    mutableLineUiState = mutableLineUiState.copy(
+                        fairMarketValueHasError = true
+                    )
+                }
+            ) else mutableLineUiState = mutableLineUiState.copy(
+                fairMarketValueHasError = false
+            )
+            if (currentLineUiState.downPayment.isNotEmpty()) validateFloatFromString(
+                string = currentLineUiState.downPayment,
+                onSuccess = {
+                    mutableLineUiState = mutableLineUiState.copy(
+                        downPaymentHasError = false
+                    )
+                },
+                onFail = {
+                    mutableLineUiState = mutableLineUiState.copy(
+                        downPaymentHasError = true
+                    )
+                }
+            ) else mutableLineUiState = mutableLineUiState.copy(
+                downPaymentHasError = false
+            )
         }
         mutableListOfLineUiStates[index] = mutableLineUiState
-        _uiState.update { currentState ->
-            currentState.copy(
+        _uiState.update {
+            it.copy(
                 listOfLinesUiState = mutableListOfLineUiStates.toList()
             )
         }
@@ -214,7 +189,7 @@ class NewCxViewModel : ViewModel() {
         enableSaveNewCxButton()
     }
 
-    fun validateFloatFromString(string: String, onSuccess: () -> Unit, onFail: () -> Unit) {
+    private fun validateFloatFromString(string: String, onSuccess: () -> Unit, onFail: () -> Unit) {
         try {
             string.toFloat()
             onSuccess()
@@ -228,36 +203,32 @@ class NewCxViewModel : ViewModel() {
             val mutableListOfLines = _uiState.value.listOfLines.toMutableList()
             var newLine = mutableListOfLines[index]
             val lineUiState = _uiState.value.listOfLinesUiState[index]
-            if (lineUiState.isByod) {
-                newLine = newLine.copy(
-                    lineNumber = index,
-                    fullDeviceCost = 0f,
-                    promotionAmount = 0f,
-                    fairMarketValue = 0f,
-                    downPayment = 0f,
-                    hasP360 = lineUiState.hasP360,
-                    isByod = true
-                )
-            } else {
-                newLine = newLine.copy(
-                    lineNumber = index,
-                    fullDeviceCost = lineUiState.fullDeviceCost.toFloat(),
-                    promotionAmount = if (lineUiState.promotionAmount.isNotEmpty()) {
-                        lineUiState.promotionAmount.toFloat()
-                    } else 0f,
-                    fairMarketValue = if (lineUiState.fairMarketValue.isNotEmpty()) {
-                        lineUiState.fairMarketValue.toFloat()
-                    } else 0f,
-                    downPayment = if (lineUiState.downPayment.isNotEmpty()) {
-                        lineUiState.downPayment.toFloat()
-                    } else 0f,
-                    hasP360 = lineUiState.hasP360,
-                    isByod = false
-                )
-            }
+            if (lineUiState.isByod) newLine = newLine.copy(
+                lineNumber = index,
+                fullDeviceCost = 0f,
+                promotionAmount = 0f,
+                fairMarketValue = 0f,
+                downPayment = 0f,
+                hasP360 = lineUiState.hasP360,
+                isByod = true
+            ) else newLine = newLine.copy(
+                lineNumber = index,
+                fullDeviceCost = lineUiState.fullDeviceCost.toFloat(),
+                promotionAmount = if (lineUiState.promotionAmount.isNotEmpty()) {
+                    lineUiState.promotionAmount.toFloat()
+                } else 0f,
+                fairMarketValue = if (lineUiState.fairMarketValue.isNotEmpty()) {
+                    lineUiState.fairMarketValue.toFloat()
+                } else 0f,
+                downPayment = if (lineUiState.downPayment.isNotEmpty()) {
+                    lineUiState.downPayment.toFloat()
+                } else 0f,
+                hasP360 = lineUiState.hasP360,
+                isByod = false
+            )
             mutableListOfLines[index] = newLine
-            _uiState.update { currentState ->
-                currentState.copy(
+            _uiState.update {
+                it.copy(
                     listOfLines = mutableListOfLines.toList()
                 )
             }
@@ -266,22 +237,22 @@ class NewCxViewModel : ViewModel() {
 
     private fun checkForUiStateError(): Boolean {
         val hasError: MutableList<Boolean?> = mutableListOf(_uiState.value.lineCountError)
-        _uiState.value.listOfLinesUiState.forEach { lineUiState ->
-            hasError.add(lineUiState.fullDeviceCostHasError)
-            hasError.add(lineUiState.promotionAmountHasError)
-            hasError.add(lineUiState.fairMarketValueHasError)
-            hasError.add(lineUiState.downPaymentHasError)
+        _uiState.value.listOfLinesUiState.forEach {
+            hasError.add(it.fullDeviceCostHasError)
+            hasError.add(it.promotionAmountHasError)
+            hasError.add(it.fairMarketValueHasError)
+            hasError.add(it.downPaymentHasError)
         }
         return hasError.all { it == false }
     }
 
-    fun enableSaveNewCxButton() {
-        _uiState.update { currentState ->
-            currentState.copy(saveNewCxButtonEnabled = checkForUiStateError())
+    private fun enableSaveNewCxButton() {
+        _uiState.update {
+            it.copy(saveNewCxButtonEnabled = checkForUiStateError())
         }
     }
 
-    fun generateQuote(){
+    fun generateQuote() {
         _uiState.update { currentState ->
             currentState.copy(
                 quote = currentState.ratePlan?.let { Quote(it, currentState.listOfLines) }
