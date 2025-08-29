@@ -61,7 +61,6 @@ class NewCxViewModel : ViewModel() {
         }
     }
 
-    //TODO Consider reworking this. It can probably be done better.
     fun updateLineCount(newLineCount: String) {
         try {
             when {
@@ -110,103 +109,162 @@ class NewCxViewModel : ViewModel() {
     }
 
     fun updateLineUiStates(index: Int, currentLineUiState: LineUiState) {
-        updateAndValidateLineUiStates(index, currentLineUiState)
-        enableSaveNewCxButton()
-    }
-
-    //TODO Clean this up big time. Right now, error handling is very buggy.
-    private fun updateAndValidateLineUiStates(index: Int, currentLineUiState: LineUiState) {
-        val toastMessage = "Must be only numbers."
         val mutableListOfLineUiStates = _uiState.value.listOfLinesUiState.toMutableList()
-        var updatedLineUiState: LineUiState
-        when {
-            currentLineUiState.isByod -> {
-                emitToast("Saving line as BYOD.")
-                updatedLineUiState = currentLineUiState.copy(
-                    fullDeviceCost = "",
-                    promotionAmount = "",
-                    fairMarketValue = "",
-                    downPayment = ""
+        var mutableLineUiState = mutableListOfLineUiStates[index]
+        mutableLineUiState = mutableLineUiState.copy(
+            fullDeviceCost = currentLineUiState.fullDeviceCost,
+            promotionAmount = currentLineUiState.promotionAmount,
+            fairMarketValue = currentLineUiState.fairMarketValue,
+            downPayment = currentLineUiState.downPayment,
+            hasP360 = currentLineUiState.hasP360,
+            isByod = currentLineUiState.isByod
+        )
+        if (currentLineUiState.isByod) {
+            mutableListOfLineUiStates[index] = mutableLineUiState.copy(
+                fullDeviceCost = "",
+                promotionAmount = "",
+                fairMarketValue = "",
+                downPayment = ""
+            )
+        } else {
+            if (currentLineUiState.fullDeviceCost.isNotEmpty()) {
+                validateFloatFromString(
+                    string = currentLineUiState.fullDeviceCost,
+                    onSuccess = {
+                        mutableLineUiState = mutableLineUiState.copy(
+                            fullDeviceCostHasError = false
+                        )
+                    },
+                    onFail = {
+                        mutableLineUiState = mutableLineUiState.copy(
+                            fullDeviceCostHasError = true
+                        )
+                    }
                 )
-            } currentLineUiState.fullDeviceCost == "" -> {
-                updatedLineUiState = currentLineUiState.copy(
+            } else {
+                mutableLineUiState = mutableLineUiState.copy(
                     fullDeviceCostHasError = true
                 )
-            } currentLineUiState.promotionAmount != "" -> {
-                try {
-                    currentLineUiState.promotionAmount.toFloat()
-                    updatedLineUiState = currentLineUiState.copy(
-                        promotionAmountHasError = false
-                    )
-                } catch (_: NumberFormatException) {
-                    emitToast(toastMessage)
-                    updatedLineUiState = currentLineUiState.copy(
-                        promotionAmountHasError = true
-                    )
-                }
-            } currentLineUiState.fairMarketValue != "" -> {
-                try {
-                    currentLineUiState.fairMarketValue.toFloat()
-                    updatedLineUiState = currentLineUiState.copy(fairMarketValueHasError = false)
-                } catch (_: NumberFormatException) {
-                    emitToast(toastMessage)
-                    updatedLineUiState = currentLineUiState.copy(fairMarketValueHasError = true)
-                }
-            } currentLineUiState.downPayment != "" -> {
-                try {
-                    currentLineUiState.downPayment.toFloat()
-                    updatedLineUiState = currentLineUiState.copy(downPaymentHasError = false)
-                } catch (_: NumberFormatException) {
-                    emitToast(toastMessage)
-                    updatedLineUiState = currentLineUiState.copy(downPaymentHasError = true)
-                }
-            } else -> {
-                try {
-                    currentLineUiState.fullDeviceCost.toFloat()
-                    updatedLineUiState = currentLineUiState.copy(fullDeviceCostHasError = false)
-                } catch (_: NumberFormatException) {
-                    emitToast(toastMessage)
-                    updatedLineUiState = currentLineUiState.copy(fullDeviceCostHasError = true)
-                }
+            }
+            if (currentLineUiState.promotionAmount.isNotEmpty()) {
+                validateFloatFromString(
+                    string = currentLineUiState.promotionAmount,
+                    onSuccess = {
+                        mutableLineUiState = mutableLineUiState.copy(
+                            promotionAmountHasError = false
+                        )
+                    },
+                    onFail = {
+                        mutableLineUiState = mutableLineUiState.copy(
+                            promotionAmountHasError = true
+                        )
+                    }
+                )
+            } else {
+                mutableLineUiState = mutableLineUiState.copy(
+                    promotionAmountHasError = false
+                )
+            }
+            if (currentLineUiState.fairMarketValue.isNotEmpty()) {
+                validateFloatFromString(
+                    string = currentLineUiState.fairMarketValue,
+                    onSuccess = {
+                        mutableLineUiState = mutableLineUiState.copy(
+                            fairMarketValueHasError = false
+                        )
+                    },
+                    onFail = {
+                        mutableLineUiState = mutableLineUiState.copy(
+                            fairMarketValueHasError = true
+                        )
+                    }
+                )
+            } else {
+                mutableLineUiState = mutableLineUiState.copy(
+                    fairMarketValueHasError = false
+                )
+            }
+            if (currentLineUiState.downPayment.isNotEmpty()) {
+                validateFloatFromString(
+                    string = currentLineUiState.downPayment,
+                    onSuccess = {
+                        mutableLineUiState = mutableLineUiState.copy(
+                            downPaymentHasError = false
+                        )
+                    },
+                    onFail = {
+                        mutableLineUiState = mutableLineUiState.copy(
+                            downPaymentHasError = true
+                        )
+                    }
+                )
+            } else {
+                mutableLineUiState = mutableLineUiState.copy(
+                    downPaymentHasError = false
+                )
             }
         }
-        mutableListOfLineUiStates[index] = updatedLineUiState
+        mutableListOfLineUiStates[index] = mutableLineUiState
         _uiState.update { currentState ->
             currentState.copy(
                 listOfLinesUiState = mutableListOfLineUiStates.toList()
             )
         }
+        updateLines(index)
+        enableSaveNewCxButton()
     }
 
-    //TODO Clean this code up. It's buggy and ugly.
-    private fun updateAndValidateLines() {
-        val mutableListOfLines = _uiState.value.listOfLines.toMutableList()
-        mutableListOfLines.forEachIndexed{ i, line ->
-            val lineUiState = _uiState.value.listOfLinesUiState[i]
-            if (!lineUiState.isByod) {
-                mutableListOfLines[i] = line.copy(
+    fun validateFloatFromString(string: String, onSuccess: () -> Unit, onFail: () -> Unit) {
+        try {
+            string.toFloat()
+            onSuccess()
+        } catch (_: NumberFormatException) {
+            onFail()
+        }
+    }
+
+    private fun updateLines(index: Int) {
+        if (checkForUiStateError()) {
+            val mutableListOfLines = _uiState.value.listOfLines.toMutableList()
+            var newLine = mutableListOfLines[index]
+            val lineUiState = _uiState.value.listOfLinesUiState[index]
+            if (lineUiState.isByod) {
+                newLine = newLine.copy(
+                    lineNumber = index,
+                    fullDeviceCost = 0f,
+                    promotionAmount = 0f,
+                    fairMarketValue = 0f,
+                    downPayment = 0f,
+                    hasP360 = lineUiState.hasP360,
+                    isByod = true
+                )
+            } else {
+                newLine = newLine.copy(
+                    lineNumber = index,
                     fullDeviceCost = lineUiState.fullDeviceCost.toFloat(),
-                    promotionAmount = if (lineUiState.promotionAmount != "") {
+                    promotionAmount = if (lineUiState.promotionAmount.isNotEmpty()) {
                         lineUiState.promotionAmount.toFloat()
                     } else 0f,
-                    fairMarketValue = if (lineUiState.fairMarketValue != "") {
+                    fairMarketValue = if (lineUiState.fairMarketValue.isNotEmpty()) {
                         lineUiState.fairMarketValue.toFloat()
                     } else 0f,
-                    downPayment = if (lineUiState.downPayment != "") {
+                    downPayment = if (lineUiState.downPayment.isNotEmpty()) {
                         lineUiState.downPayment.toFloat()
                     } else 0f,
-                    hasP360 = lineUiState.hasP360
+                    hasP360 = lineUiState.hasP360,
+                    isByod = false
+                )
+            }
+            mutableListOfLines[index] = newLine
+            _uiState.update { currentState ->
+                currentState.copy(
+                    listOfLines = mutableListOfLines.toList()
                 )
             }
         }
-        _uiState.update { currentState ->
-            currentState.copy(
-                listOfLines = mutableListOfLines.toList(),
-            )
-        }
     }
 
-    fun enableSaveNewCxButton() {
+    private fun checkForUiStateError(): Boolean {
         val hasError: MutableList<Boolean?> = mutableListOf(_uiState.value.lineCountError)
         _uiState.value.listOfLinesUiState.forEach { lineUiState ->
             hasError.add(lineUiState.fullDeviceCostHasError)
@@ -214,9 +272,12 @@ class NewCxViewModel : ViewModel() {
             hasError.add(lineUiState.fairMarketValueHasError)
             hasError.add(lineUiState.downPaymentHasError)
         }
-        if (hasError.all { it == false }) updateAndValidateLines()
+        return hasError.all { it == false }
+    }
+
+    fun enableSaveNewCxButton() {
         _uiState.update { currentState ->
-            currentState.copy(saveNewCxButtonEnabled = hasError.all { it == false })
+            currentState.copy(saveNewCxButtonEnabled = checkForUiStateError())
         }
     }
 
