@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -17,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
@@ -45,9 +47,10 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.quoe_t.LineUiState
-import com.example.quoe_t.QuoetViewModel
+import com.example.quoe_t.NewCxViewModel
 import com.example.quoe_t.business.Line
 import com.example.quoe_t.business.RatePlan
 import java.util.Locale
@@ -55,18 +58,17 @@ import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DevicesScreen(
-    quoetViewModel: QuoetViewModel,
+    newCxViewModel: NewCxViewModel,
     onSaveAndCloseClicked: () -> Unit
 ) {
-    val uiState by quoetViewModel.uiState.collectAsState()
+    val uiState by newCxViewModel.uiState.collectAsState()
 
-    val ratePlanName = uiState.ratePlan.data.rateName
+    val ratePlanName = uiState.ratePlan?.data?.rateName
     val lineCount = uiState.lineCount
-    val isError = uiState.isError
 
     val context = LocalContext.current
     LaunchedEffect(key1 = Unit) {
-        quoetViewModel.toastMessage.collect { message ->
+        newCxViewModel.toastMessage.collect { message ->
             Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
         }
     }
@@ -74,7 +76,7 @@ fun DevicesScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Device Screen") }
+                title = { Text("New Customer") }
             )
         },
         bottomBar = {
@@ -85,10 +87,11 @@ fun DevicesScreen(
                 ) {
                     Button(
                         onClick = {
-                            quoetViewModel.generateQuote()
+                            newCxViewModel.generateQuote()
                             onSaveAndCloseClicked()
                         },
-                        shape = RoundedCornerShape(4.dp), //TODO Add this shape to all bottomAppBar buttons.
+                        enabled = uiState.saveNewCxButtonEnabled,
+                        shape = RoundedCornerShape(4.dp),
                         modifier = Modifier
                     ) {
                         Text("Save & Close")
@@ -100,33 +103,39 @@ fun DevicesScreen(
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
-                .fillMaxWidth()
                 .padding(innerPadding)
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth()
+            OutlinedCard (
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                modifier = Modifier
+                    .padding(2.dp)
             ) {
-                RatePlanSelectionMenu(
-                    modifier = Modifier,
-                    ratePlanName = ratePlanName,
-                ) { newRatePlan ->
-                    quoetViewModel.setRatePlan(newRatePlan)
-                }
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    RatePlanSelectionMenu(
+                        modifier = Modifier,
+                        ratePlanName = ratePlanName,
+                    ) { newRatePlan ->
+                        newCxViewModel.setRatePlan(newRatePlan)
+                    }
 
-                LineCountInputField(
-                    modifier = Modifier,
-                    lineCount = lineCount,
-                    isError =  isError
-                ) { newLineCount ->
-                    quoetViewModel.setLineCount(newLineCount)
+                    LineCountInputField(
+                        modifier = Modifier,
+                        lineCount = lineCount,
+                        isError = uiState.lineCountError
+                    ) { newLineCount ->
+                        newCxViewModel.updateLineCount(newLineCount)
+                    }
                 }
             }
+
             DevicesList(
                 lines = uiState.listOfLines,
-                linesUiState = uiState.listOfLineUiStates,
+                linesUiState = uiState.listOfLinesUiState,
                 onValueChanged = { index, lineUiState ->
-                    quoetViewModel.updateLineUiState(index, lineUiState)
+                    newCxViewModel.updateLineUiStates(index, lineUiState)
                 }
             )
         }
@@ -136,7 +145,7 @@ fun DevicesScreen(
 @Composable
 fun RatePlanSelectionMenu(
     modifier: Modifier = Modifier,
-    ratePlanName: String,
+    ratePlanName: String?,
     onRatePlanSelection: (RatePlan) -> Unit
 ) {
     val listOfRatePlans = RatePlan.getAllRatePlans()
@@ -146,16 +155,21 @@ fun RatePlanSelectionMenu(
     Column {
         OutlinedTextField(
             label = { Text("Rate Plan") },
-            value = ratePlanName,
+            value = ratePlanName ?: "",
             onValueChange = {},
             readOnly = true,
             enabled = false,
             colors = TextFieldDefaults.colors(
-                disabledContainerColor = OutlinedTextFieldDefaults.colors().unfocusedContainerColor,
-                disabledTextColor = OutlinedTextFieldDefaults.colors().unfocusedTextColor,
-                disabledLabelColor = OutlinedTextFieldDefaults.colors().unfocusedLabelColor,
-                disabledTrailingIconColor = OutlinedTextFieldDefaults.colors().unfocusedTrailingIconColor,
-                disabledIndicatorColor = OutlinedTextFieldDefaults.colors().unfocusedIndicatorColor
+                disabledContainerColor =
+                    OutlinedTextFieldDefaults.colors().unfocusedContainerColor,
+                disabledTextColor =
+                    OutlinedTextFieldDefaults.colors().unfocusedTextColor,
+                disabledLabelColor =
+                    OutlinedTextFieldDefaults.colors().unfocusedLabelColor,
+                disabledTrailingIconColor =
+                    OutlinedTextFieldDefaults.colors().unfocusedTrailingIconColor,
+                disabledIndicatorColor =
+                    OutlinedTextFieldDefaults.colors().unfocusedIndicatorColor
             ),
             trailingIcon = {
                 Icon(
@@ -227,23 +241,38 @@ fun DevicesList(
     linesUiState: List<LineUiState>,
     onValueChanged: (index: Int, lineUiState: LineUiState) -> Unit
 ) {
-    if (lines.isEmpty()) {
-        Text(
-            text = "Line data will show here.",
-            modifier = Modifier.padding(vertical = 64.dp)
-        )
-    } else {
-        LazyColumn(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            itemsIndexed(items = lines) { index, line ->
-                DeviceItem(
-                    line = line,
-                    lineUiState = linesUiState[index],
-                    onValueChanged = { lineUiState ->
-                        onValueChanged(index, lineUiState)
-                    }
-                )
+    OutlinedCard (
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(2.dp)
+    ) {
+        if (lines.isEmpty()) {
+            Text(
+                text = "Device data will show here.",
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(vertical = 64.dp)
+            )
+        } else {
+            Text(
+                text = "Input Device Data",
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+            LazyColumn(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                itemsIndexed(items = lines) { index, line ->
+                    DeviceItem(
+                        line = line,
+                        lineUiState = linesUiState[index],
+                        onValueChanged = { lineUiState ->
+                            onValueChanged(index, lineUiState)
+                        }
+                    )
+                }
             }
         }
     }
@@ -255,11 +284,11 @@ fun DeviceItem(
     lineUiState: LineUiState,
     onValueChanged: (LineUiState) -> Unit
 ) {
-    OutlinedCard (
+    Card(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(2.dp)
+            .fillMaxSize()
+            .padding(6.dp)
     ) {
 
         Row (
@@ -281,6 +310,7 @@ fun DeviceItem(
                             onValueChanged(lineUiState.copy(fullDeviceCost = newFullDeviceCost))
                         },
                         enabled = !lineUiState.isByod,
+                        isError = lineUiState.fullDeviceCostHasError,
                         label = { Text("Cost") }
                     )
                     DeviceInputTextField(
@@ -289,6 +319,7 @@ fun DeviceItem(
                             onValueChanged(lineUiState.copy(promotionAmount = newPromotionAmount))
                         },
                         enabled = !lineUiState.isByod,
+                        isError = lineUiState.promotionAmountHasError,
                         label = { Text("Promo") }
                     )
                     DeviceInputTextField(
@@ -297,6 +328,7 @@ fun DeviceItem(
                             onValueChanged(lineUiState.copy(fairMarketValue = newFairMarketValue))
                         },
                         enabled = !lineUiState.isByod,
+                        isError = lineUiState.fairMarketValueHasError,
                         label = { Text("Fmv") }
                     )
                 }
@@ -308,8 +340,8 @@ fun DeviceItem(
                             onValueChanged(lineUiState.copy(downPayment = newDownPayment))
                         },
                         enabled = !lineUiState.isByod,
+                        isError = lineUiState.downPaymentHasError,
                         label = { Text("Down") },
-                        modifier = Modifier.weight(1f)
                     )
 
                     Row(
@@ -389,14 +421,13 @@ fun DeviceItem(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RowScope.DeviceInputTextField(
-    modifier: Modifier = Modifier,
     value: String,
     onValueChange: (String) -> Unit,
     label: @Composable (() -> Unit)? = null,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    isError: Boolean
 ) {
     OutlinedTextField(
         value = value,
@@ -405,6 +436,7 @@ fun RowScope.DeviceInputTextField(
         label = label,
         singleLine = true,
         enabled = enabled,
-        modifier = modifier.weight(1f).padding(horizontal = 4.dp, vertical = 2.dp)
+        isError = isError,
+        modifier = Modifier.weight(1f).padding(horizontal = 4.dp, vertical = 2.dp)
     )
 }

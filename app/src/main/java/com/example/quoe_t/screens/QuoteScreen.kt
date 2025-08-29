@@ -28,13 +28,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.quoe_t.QuoetViewModel
+import com.example.quoe_t.NewCxViewModel
 import java.util.Locale
 
+
+//TODO Review code after ViewModel change.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun QuoteScreen(quoetViewModel: QuoetViewModel, onCloseClicked: () -> Unit) {
-    val uiState by quoetViewModel.uiState.collectAsState()
+fun QuoteScreen(newCxViewModel: NewCxViewModel, onCloseClicked: () -> Unit) {
+    val uiState by newCxViewModel.uiState.collectAsState()
 
     Scaffold(
         topBar = {
@@ -70,8 +72,8 @@ fun QuoteScreen(quoetViewModel: QuoetViewModel, onCloseClicked: () -> Unit) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                BillTotalsCard("Monthly Bill Est:", uiState.quote.monthlyBill())
-                BillTotalsCard("One-Time Credit:", uiState.quote.oneTimeBillCredit())
+                uiState.quote?.let { BillTotalsCard("Monthly Bill Est:", it.monthlyBill()) }
+                uiState.quote?.let {BillTotalsCard("One-Time Credit:", it.oneTimeBillCredit()) }
             }
             OutlinedCard (
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -120,12 +122,12 @@ fun QuoteScreen(quoetViewModel: QuoetViewModel, onCloseClicked: () -> Unit) {
                                         )
                                         ReceiptPrinter(
                                             item = "Device balance after down payment:",
-                                            cost = line.deviceBalance
+                                            cost = line.totalDeviceBalance
                                         )
                                     }
                                     ReceiptPrinter(
                                         item = "Monthly device payment:",
-                                        cost = line.deviceBalance / 24
+                                        cost = line.totalDeviceBalance / 24
                                     )
                                 }
                                 if (line.promotionAmount != 0f) {

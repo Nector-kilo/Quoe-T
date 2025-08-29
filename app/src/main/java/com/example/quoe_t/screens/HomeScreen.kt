@@ -15,24 +15,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.quoe_t.QuoetViewModel
 
-//TODO Move all code to DevicesScreen, refactor DevicesScreen to NewBanScreen, change HomeScreen to choose between upgrading device or new account.
+//TODO Refactor DevicesScreen to NewBanScreen, change HomeScreen to choose between upgrading device or new account.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    quoetViewModel: QuoetViewModel,
     onAddDevicesClicked: () -> Unit
 ) {
-    val uiState by quoetViewModel.uiState.collectAsState()
-
-    val addDevicesButtonEnabled = uiState.addDevicesButtonEnabled
-
     Scaffold(
         topBar = {
             TopAppBar(

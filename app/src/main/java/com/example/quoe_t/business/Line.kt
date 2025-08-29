@@ -14,15 +14,15 @@ data class Line (
 ) {
 
     init {
-        promotionAmount -= fairMarketValue
+        promotionAmount = promotionAmount - fairMarketValue
     }
 
-    val deviceBalance = fullDeviceCost - downPayment
+    val totalDeviceBalance = fullDeviceCost - downPayment
 
-    private val deviceBalanceAfterPromoMath: Float = round((deviceBalance - promotionAmount) * 100) / 100
+    private val deviceBalanceAfterPromoMath: Float = round((totalDeviceBalance - promotionAmount) * 100) / 100
     val deviceBalanceAfterPromo: Float = if (deviceBalanceAfterPromoMath == -0.01f) 0f else deviceBalanceAfterPromoMath
 
-    private val monthlyDevicePaymentAfterPromoMath: Float = round(((deviceBalance - promotionAmount) / 24) * 100) / 100
+    private val monthlyDevicePaymentAfterPromoMath: Float = round(((totalDeviceBalance - promotionAmount) / 24) * 100) / 100
     val monthlyDevicePaymentAfterPromo: Float = if (monthlyDevicePaymentAfterPromoMath == -0f) 0f else monthlyDevicePaymentAfterPromoMath
 
     // Very rough estimate of monthly Protection 360 cost. Update if true pricing is ever made public.

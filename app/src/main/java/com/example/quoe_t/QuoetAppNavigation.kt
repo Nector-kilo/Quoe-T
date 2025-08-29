@@ -19,27 +19,27 @@ object Devices
 @Serializable
 object Quote
 
+//TODO Refactor this navchart to only navigate through the NewCx screens.
 @Composable
 fun QuoetAppNavigation() {
     val navController = rememberNavController()
-    val quoetViewModel: QuoetViewModel = viewModel()
+    val newCxViewModel: NewCxViewModel = viewModel()
 
     NavHost(navController, startDestination = Home) {
         composable<Home> {
-            HomeScreen(quoetViewModel) {
+            HomeScreen {
                 navController.navigate(Devices)
             }
         }
 
         composable<Devices> {
-            DevicesScreen(quoetViewModel) {
+            DevicesScreen(newCxViewModel) {
                 navController.navigate(Quote)
             }
         }
 
         composable<Quote> {
-            QuoteScreen(quoetViewModel) {
-                quoetViewModel.clearViewModel()
+            QuoteScreen(newCxViewModel) {
                 navController.navigate(Home)
             }
         }
