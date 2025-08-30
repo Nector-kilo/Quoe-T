@@ -1,4 +1,4 @@
-package com.example.quoe_t.screens
+package com.example.quoe_t.newCx.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -28,57 +28,43 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.quoe_t.NewCxViewModel
+import com.example.quoe_t.newCx.NewCxViewModel
 import java.util.Locale
 
 
-//TODO Review code after ViewModel change.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun QuoteScreen(newCxViewModel: NewCxViewModel, onCloseClicked: () -> Unit) {
+fun NewCxQuoteScreen(newCxViewModel: NewCxViewModel, onCloseClicked: () -> Unit) {
     val uiState by newCxViewModel.uiState.collectAsState()
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Quote") }
-            )
-        },
-        bottomBar = {
-            BottomAppBar(containerColor = MaterialTheme.colorScheme.background) {
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Button(
-                        onClick = {
-                            onCloseClicked()
-                        },
-                        shape = RoundedCornerShape(4.dp)
-                    ) { Text("New Quote") }
-                    //TODO Implement share button.
-                }
+        topBar = { TopAppBar(title = { Text("New Customer Quote") }) },
+        bottomBar = { BottomAppBar(containerColor = MaterialTheme.colorScheme.background) {
+            Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
+                //TODO Implement share feature.
+                Button(
+                    onClick = { onCloseClicked() },
+                    shape = RoundedCornerShape(4.dp),
+                    modifier = Modifier.fillMaxWidth().padding(8.dp)
+                ) { Text("Close") }
             }
-        }
+        }}
     ) { innerPadding ->
         Column (
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().padding(innerPadding)
         ) {
             Row (
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                uiState.quote?.let { BillTotalsCard("Monthly Bill Est:", it.monthlyBill()) }
-                uiState.quote?.let {BillTotalsCard("One-Time Credit:", it.oneTimeBillCredit()) }
+                uiState.newCxQuote?.let { BillTotalsCard("Monthly Bill Est:", it.monthlyBill()) }
+                uiState.newCxQuote?.let {BillTotalsCard("One-Time Credit:", it.oneTimeBillCredit()) }
             }
             OutlinedCard (
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                modifier = Modifier
-                    .padding(6.dp)
+                modifier = Modifier.padding(6.dp)
             ) {
                 Text (
                     text = "Detailed Device Summary",
@@ -89,28 +75,23 @@ fun QuoteScreen(newCxViewModel: NewCxViewModel, onCloseClicked: () -> Unit) {
                     itemsIndexed(uiState.listOfLines) { _, line ->
                         Card (
                             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(6.dp)
+                            modifier = Modifier.fillMaxSize().padding(6.dp)
                         ) {
-                            Column (
-                                modifier = Modifier.padding(4.dp)
-                            ) {
+                            Column (modifier = Modifier.padding(4.dp)) {
                                 Text (
-                                    text = "Line ${line.lineNumber}",
+                                    text = "Line ${line.lineNumber + 1}",
                                     textAlign = TextAlign.Center,
                                     modifier = Modifier.fillMaxWidth()
                                 )
                                 ReceiptPrinter(
                                     item = "Total monthly cost estimate:",
-                                    cost = line.monthlyDevicePaymentAfterPromo + line.p360MonthlyPayment
+                                    cost = line.monthlyDevicePaymentAfterPromo +
+                                            line.p360MonthlyPayment
                                 )
-                                if (line.fullDeviceCost == 0f) {
-                                    ReceiptPrinter(
+                                if (line.fullDeviceCost == 0f) ReceiptPrinter(
                                         item = "Full device cost:",
                                         text = "BYOD"
-                                    )
-                                } else {
+                                ) else {
                                     ReceiptPrinter(
                                         item = "Full device cost:",
                                         cost = line.fullDeviceCost
@@ -140,18 +121,14 @@ fun QuoteScreen(newCxViewModel: NewCxViewModel, onCloseClicked: () -> Unit) {
                                         cost = line.monthlyDevicePaymentAfterPromo
                                     )
                                 }
-                                if (line.hasP360) {
-                                    ReceiptPrinter(
-                                        item = "P360 monthly cost estimate",
-                                        cost = line.p360MonthlyPayment
-                                    )
-                                }
-                                if (line.fairMarketValue != 0f) {
-                                    ReceiptPrinter(
-                                        item = "One time bill credit for trade in:",
-                                        cost = line.fairMarketValue
-                                    )
-                                }
+                                if (line.hasP360) ReceiptPrinter(
+                                    item = "P360 monthly cost estimate",
+                                    cost = line.p360MonthlyPayment
+                                )
+                                if (line.fairMarketValue != 0f) ReceiptPrinter(
+                                    item = "One time bill credit for trade in:",
+                                    cost = line.fairMarketValue
+                                )
                             }
                         }
                     }
@@ -163,22 +140,17 @@ fun QuoteScreen(newCxViewModel: NewCxViewModel, onCloseClicked: () -> Unit) {
 
 @Composable
 fun BillTotalsCard(text: String, value: Float) {
-    OutlinedCard (
+    OutlinedCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        modifier = Modifier
-            .padding(6.dp)
+        modifier = Modifier.padding(6.dp)
     ) {
-        Column (
+        Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(vertical = 32.dp, horizontal = 8.dp)
         ) {
+            Text(text = text, fontSize = 22.sp)
             Text(
-                text = text,
-                fontSize = 22.sp
-            )
-            Text(
-                text = "$" +
-                        String.format(Locale.US, "%.2f", value),
+                text = "$" + String.format(Locale.US, "%.2f", value),
                 fontSize = 30.sp,
                 modifier = Modifier.padding(8.dp)
             )
@@ -187,27 +159,21 @@ fun BillTotalsCard(text: String, value: Float) {
 }
 
 @Composable
-fun ReceiptPrinter(item: String, cost: Float = 0f, text: String = "") {
+fun ReceiptPrinter(item: String, cost: Float = 0f, text: String? = null) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 2.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(text = item)
-        Text (
+        Text(
             text = ".".repeat(150),
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 4.dp),
+            modifier = Modifier.weight(1f).padding(horizontal = 4.dp),
             textAlign = TextAlign.Center,
             overflow = TextOverflow.Clip,
             maxLines = 1
         )
-        if (text == "") {
-            Text(text = "$" + String.format(Locale.US, "%.2f", cost))
-        } else {
-            Text(text = text)
-        }
+        if (text == null) Text(
+            text = "$" + String.format(Locale.US, "%.2f", cost)
+        ) else Text(text = text)
     }
 }

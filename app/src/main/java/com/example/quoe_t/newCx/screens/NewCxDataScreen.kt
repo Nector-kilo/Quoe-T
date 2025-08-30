@@ -1,4 +1,4 @@
-package com.example.quoe_t.screens
+package com.example.quoe_t.newCx.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.clickable
@@ -49,18 +49,15 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.example.quoe_t.LineUiState
-import com.example.quoe_t.NewCxViewModel
-import com.example.quoe_t.business.Line
-import com.example.quoe_t.business.RatePlan
+import com.example.quoe_t.newCx.LineUiState
+import com.example.quoe_t.newCx.NewCxViewModel
+import com.example.quoe_t.newCx.business.Line
+import com.example.quoe_t.newCx.business.RatePlan
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DevicesScreen(
-    newCxViewModel: NewCxViewModel,
-    onSaveAndCloseClicked: () -> Unit
-) {
+fun NewCxDataScreen(newCxViewModel: NewCxViewModel, onSaveAndCloseClicked: () -> Unit) {
     val uiState by newCxViewModel.uiState.collectAsState()
 
     val ratePlanName = uiState.ratePlan?.data?.rateName
@@ -74,64 +71,48 @@ fun DevicesScreen(
     }
 
     Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("New Customer") }
-            )
-        },
-        bottomBar = {
-            BottomAppBar(containerColor = MaterialTheme.colorScheme.background) {
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Button(
-                        onClick = {
-                            newCxViewModel.generateQuote()
-                            onSaveAndCloseClicked()
-                        },
-                        enabled = uiState.saveNewCxButtonEnabled,
-                        shape = RoundedCornerShape(4.dp),
-                        modifier = Modifier
-                    ) {
-                        Text("Save & Close")
-                    }
-                }
+        topBar = { TopAppBar(title = { Text("New Customer Data") })},
+        bottomBar = { BottomAppBar(containerColor = MaterialTheme.colorScheme.background) {
+            Row(horizontalArrangement = Arrangement.Center, modifier = Modifier.fillMaxWidth()) {
+                Button(
+                    onClick = {
+                        newCxViewModel.generateNewCxQuote()
+                        onSaveAndCloseClicked()
+                    },
+                    enabled = uiState.saveNewCxButtonEnabled,
+                    shape = RoundedCornerShape(4.dp),
+                    modifier = Modifier.fillMaxWidth().padding(8.dp)
+                ) { Text("Save & Close") }
             }
-        }
+        }}
     ) { innerPadding ->
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .padding(innerPadding)
+            modifier = Modifier.padding(innerPadding)
         ) {
             OutlinedCard (
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                modifier = Modifier
-                    .padding(2.dp)
+                modifier = Modifier.padding(2.dp)
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     RatePlanSelectionMenu(
-                        modifier = Modifier,
                         ratePlanName = ratePlanName,
-                    ) { newRatePlan ->
-                        newCxViewModel.setRatePlan(newRatePlan)
-                    }
+                        onRatePlanSelection = { newCxViewModel.setRatePlan(it) }
+                    )
 
                     LineCountInputField(
-                        modifier = Modifier,
                         lineCount = lineCount,
-                        isError = uiState.lineCountError
-                    ) { newLineCount ->
-                        newCxViewModel.updateLineCount(newLineCount)
-                    }
+                        isError = uiState.lineCountError,
+                        enabled = uiState.lineCountEnabled,
+                        onLineCountInput = { newCxViewModel.updateLineCount(it) }
+                    )
                 }
             }
 
-            DevicesList(
+            DevicesDataLazyList(
                 lines = uiState.listOfLines,
                 linesUiState = uiState.listOfLinesUiState,
                 onValueChanged = { index, lineUiState ->
@@ -143,11 +124,7 @@ fun DevicesScreen(
 }
 
 @Composable
-fun RatePlanSelectionMenu(
-    modifier: Modifier = Modifier,
-    ratePlanName: String?,
-    onRatePlanSelection: (RatePlan) -> Unit
-) {
+fun RatePlanSelectionMenu(ratePlanName: String?, onRatePlanSelection: (RatePlan) -> Unit) {
     val listOfRatePlans = RatePlan.getAllRatePlans()
     var expanded by remember { mutableStateOf(false) }
     var dropDownWidth by remember { mutableIntStateOf(0) }
@@ -171,106 +148,77 @@ fun RatePlanSelectionMenu(
                 disabledIndicatorColor =
                     OutlinedTextFieldDefaults.colors().unfocusedIndicatorColor
             ),
-            trailingIcon = {
-                Icon(
-                    Icons.Default.ArrowDropDown,
-                    contentDescription = "Rate Plan",
-                    modifier = Modifier.clickable {
-                        expanded = !expanded
-                    }
-                )
-            },
-            modifier = modifier
-                .clickable {
-                    expanded = !expanded
-                }
+            trailingIcon = { Icon(
+                imageVector =  Icons.Default.ArrowDropDown,
+                contentDescription = "Rate Plan",
+                modifier = Modifier.clickable { expanded = !expanded }
+            )},
+            modifier = Modifier
+                .clickable { expanded = !expanded }
                 .padding(8.dp)
-                .onSizeChanged { newSize ->
-                    dropDownWidth = newSize.width
-                }
+                .onSizeChanged { dropDownWidth = it.width }
         )
         DropdownMenu(
             expanded = expanded,
-            onDismissRequest = {
-                expanded = false
-            },
-            modifier = Modifier
-                .width(
-                    with(LocalDensity.current) {
-                        dropDownWidth.toDp()
-                    }
-                )
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.width(with(LocalDensity.current) { dropDownWidth.toDp() })
         ) {
-            listOfRatePlans.forEach { ratePlan ->
-                DropdownMenuItem(
-                    text = { Text(ratePlan.data.rateName) },
-                    onClick = {
-                        expanded = false
-                        onRatePlanSelection(ratePlan)
-                    }
-                )
-            }
+            listOfRatePlans.forEach { DropdownMenuItem(
+                text = { Text(it.data.rateName) },
+                onClick = {
+                    expanded = false
+                    onRatePlanSelection(it)
+                }
+            )}
         }
     }
 }
 
 @Composable
 fun LineCountInputField(
-    modifier: Modifier = Modifier,
     lineCount: String,
     isError: Boolean,
+    enabled: Boolean,
     onLineCountInput: (String) -> Unit
 ) {
     OutlinedTextField(
         label = { Text("Number of Lines") },
         value = lineCount,
-        onValueChange = { text ->
-            onLineCountInput(text)
-        },
+        onValueChange = { onLineCountInput(it) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         singleLine = true,
         isError = isError,
-        modifier = modifier.padding(8.dp)
+        enabled = enabled,
+        modifier = Modifier.padding(8.dp)
     )
 }
 
-
 @Composable
-fun DevicesList(
+fun DevicesDataLazyList(
     lines: List<Line>,
     linesUiState: List<LineUiState>,
     onValueChanged: (index: Int, lineUiState: LineUiState) -> Unit
 ) {
     OutlinedCard (
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(2.dp)
+        modifier = Modifier.fillMaxSize().padding(2.dp)
     ) {
-        if (lines.isEmpty()) {
-            Text(
+        if (lines.isEmpty()) Text(
                 text = "Device data will show here.",
                 textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(vertical = 64.dp)
-            )
-        } else {
+                modifier = Modifier.fillMaxSize().padding(vertical = 64.dp)
+        ) else {
             Text(
                 text = "Input Device Data",
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
-            LazyColumn(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+            LazyColumn(horizontalAlignment = Alignment.CenterHorizontally) {
                 itemsIndexed(items = lines) { index, line ->
-                    DeviceItem(
+                    DeviceDataItem(
                         line = line,
                         lineUiState = linesUiState[index],
-                        onValueChanged = { lineUiState ->
-                            onValueChanged(index, lineUiState)
-                        }
+                        onLineUiChanged = { onValueChanged(index, it) }
                     )
                 }
             }
@@ -279,54 +227,36 @@ fun DevicesList(
 }
 
 @Composable
-fun DeviceItem(
-    line: Line,
-    lineUiState: LineUiState,
-    onValueChanged: (LineUiState) -> Unit
-) {
+fun DeviceDataItem(line: Line, lineUiState: LineUiState, onLineUiChanged: (LineUiState) -> Unit) {
     Card(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(6.dp)
+        modifier = Modifier.fillMaxSize().padding(6.dp)
     ) {
-
-        Row (
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Row (verticalAlignment = Alignment.CenterVertically) {
             Text (
-                text = "Line\n   ${line.lineNumber}",
-                modifier = Modifier
-                    .padding(8.dp)
+                text = "Line\n   ${line.lineNumber + 1}",
+                modifier = Modifier.padding(8.dp)
             )
+            Column (modifier = Modifier.weight(1f)) {
 
-            Column (
-                modifier = Modifier.weight(1f)
-            ) {
                 Row {
                     DeviceInputTextField(
                         value = lineUiState.fullDeviceCost,
-                        onValueChange = { newFullDeviceCost ->
-                            onValueChanged(lineUiState.copy(fullDeviceCost = newFullDeviceCost))
-                        },
+                        onValueChange = { onLineUiChanged(lineUiState.copy(fullDeviceCost = it)) },
                         enabled = !lineUiState.isByod,
                         isError = lineUiState.fullDeviceCostHasError,
                         label = { Text("Cost") }
                     )
                     DeviceInputTextField(
                         value = lineUiState.promotionAmount,
-                        onValueChange = { newPromotionAmount ->
-                            onValueChanged(lineUiState.copy(promotionAmount = newPromotionAmount))
-                        },
+                        onValueChange = { onLineUiChanged(lineUiState.copy(promotionAmount = it)) },
                         enabled = !lineUiState.isByod,
                         isError = lineUiState.promotionAmountHasError,
                         label = { Text("Promo") }
                     )
                     DeviceInputTextField(
                         value = lineUiState.fairMarketValue,
-                        onValueChange = { newFairMarketValue ->
-                            onValueChanged(lineUiState.copy(fairMarketValue = newFairMarketValue))
-                        },
+                        onValueChange = { onLineUiChanged(lineUiState.copy(fairMarketValue = it))},
                         enabled = !lineUiState.isByod,
                         isError = lineUiState.fairMarketValueHasError,
                         label = { Text("Fmv") }
@@ -336,84 +266,61 @@ fun DeviceItem(
                 Row {
                     DeviceInputTextField(
                         value = lineUiState.downPayment,
-                        onValueChange = { newDownPayment ->
-                            onValueChanged(lineUiState.copy(downPayment = newDownPayment))
-                        },
+                        onValueChange = { onLineUiChanged(lineUiState.copy(downPayment = it)) },
                         enabled = !lineUiState.isByod,
                         isError = lineUiState.downPaymentHasError,
                         label = { Text("Down") },
                     )
-
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .weight(1f)
-                            .align(Alignment.CenterVertically)
+                        modifier = Modifier.weight(1f).align(Alignment.CenterVertically)
                     ) {
                         Checkbox(
                             checked = lineUiState.isByod,
-                            onCheckedChange = { newIsByod ->
-                                onValueChanged(lineUiState.copy(isByod = newIsByod))
-                            }
+                            onCheckedChange = { onLineUiChanged(lineUiState.copy(isByod = it)) }
                         )
                         Text(
                             text = "BYOD",
                             modifier = Modifier.clickable(
-                                onClick = {
-                                    onValueChanged(lineUiState.copy(isByod = !lineUiState.isByod))
-                                }
+                                onClick = { onLineUiChanged(lineUiState.copy(
+                                    isByod = !lineUiState.isByod
+                                ))}
                             )
                         )
                     }
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .weight(1f)
-                            .align(Alignment.CenterVertically)
+                        modifier = Modifier.weight(1f).align(Alignment.CenterVertically)
                     ) {
                         Checkbox(
                             checked = lineUiState.hasP360,
-                            onCheckedChange = { newHasP360 ->
-                                onValueChanged(lineUiState.copy(hasP360 = newHasP360))
-                            }
+                            onCheckedChange = { onLineUiChanged(lineUiState.copy(hasP360 = it)) }
                         )
                         Text(
                             text = "P360",
-                            modifier = Modifier.clickable(
-                                onClick = {
-                                    onValueChanged(lineUiState.copy(hasP360 = !lineUiState.hasP360))
-                                }
-                            )
+                            modifier = Modifier.clickable(onClick = {
+                                onLineUiChanged(lineUiState.copy(hasP360 = !lineUiState.hasP360))
+                            })
                         )
                     }
                 }
 
                 Row {
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(4.dp)
-                    ) {
+                    Column(modifier = Modifier.weight(1f).padding(4.dp)) {
                         Text(text = "Balance after promo")
-                        Text(
-                            text = "$" + String.format(
-                                Locale.US, "%.2f", line.deviceBalanceAfterPromo
-                            )
-                        )
+                        Text(text = "$" + String.format(
+                            Locale.US, "%.2f",
+                            line.deviceBalanceAfterPromo
+                        ))
                     }
 
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(4.dp)
-                    ) {
+                    Column(modifier = Modifier.weight(1f).padding(4.dp)) {
                         Text(text = "Total monthly cost")
-                        Text(
-                            text = "$" + String.format(
-                                Locale.US, "%.2f", line.monthlyDevicePaymentAfterPromo + line.p360MonthlyPayment
-                            )
-                        )
+                        Text(text = "$" + String.format(
+                            Locale.US, "%.2f",
+                            line.monthlyDevicePaymentAfterPromo + line.p360MonthlyPayment
+                        ))
                     }
                 }
             }

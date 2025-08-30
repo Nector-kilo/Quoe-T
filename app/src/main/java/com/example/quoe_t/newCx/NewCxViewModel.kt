@@ -1,10 +1,10 @@
-package com.example.quoe_t
+package com.example.quoe_t.newCx
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.quoe_t.business.Line
-import com.example.quoe_t.business.Quote
-import com.example.quoe_t.business.RatePlan
+import com.example.quoe_t.newCx.business.Line
+import com.example.quoe_t.newCx.business.NewCxQuote
+import com.example.quoe_t.newCx.business.RatePlan
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -30,12 +30,13 @@ data class LineUiState(
 
 data class NewCxUiState(
     val ratePlan: RatePlan? = null,
+    val lineCountEnabled: Boolean = false,
     val lineCount: String = "",
     val lineCountError: Boolean = false,
     val listOfLines: List<Line> = listOf(),
     val listOfLinesUiState: List<LineUiState> = listOf(),
     val saveNewCxButtonEnabled: Boolean = false,
-    val quote: Quote? = null
+    val newCxQuote: NewCxQuote? = null
 )
 
 class NewCxViewModel : ViewModel() {
@@ -50,29 +51,46 @@ class NewCxViewModel : ViewModel() {
     }
 
     fun setRatePlan(newRatePlan: RatePlan) {
-        _uiState.update {
-            it.copy(ratePlan = newRatePlan)
-        }
+        if (_uiState.value.ratePlan != null) {
+            _uiState.update { it.copy(ratePlan = newRatePlan) }
+            updateLineCount(_uiState.value.lineCount)
+        } else _uiState.update { it.copy(
+            ratePlan = newRatePlan,
+            lineCountEnabled = true
+        )}
     }
 
     fun updateLineCount(newLineCount: String) {
         try {
             when {
-                newLineCount.toInt() > 5 -> { onLineCountValidationFailure(
-                    newLineCount,
-                    "Maximum of 5 lines."
-                )}
-                newLineCount.toInt() < 1 -> { onLineCountValidationFailure(
-                    newLineCount,
-                    null
-                )}
+                newLineCount.toInt() > 5 -> {
+                    onLineCountValidationFailure(
+                        newLineCount,
+                        "Maximum of 5 lines."
+                    )
+                }
+
+                newLineCount.toInt() < 1 -> {
+                    onLineCountValidationFailure(
+                        newLineCount,
+                        "Minimum of 1 line"
+                    )
+                }
+
+                _uiState.value.ratePlan == RatePlan.FourLineOffer && newLineCount.toInt() < 4 -> {
+                    onLineCountValidationFailure(
+                        newLineCount,
+                        "Minimum of 4 lines for \"Four Line Offer.\""
+                    )
+                }
+
                 else -> onLineCountValidationSuccess(newLineCount)
             }
         } catch (_: NumberFormatException) {
             if (newLineCount != "") onLineCountValidationFailure(
                 newLineCount,
                 "Must be only numbers."
-            ) else onLineCountValidationFailure(newLineCount, null)
+            ) else onLineCountValidationFailure(newLineCount)
         }
     }
 
@@ -80,7 +98,7 @@ class NewCxViewModel : ViewModel() {
         val listOfLines = mutableListOf<Line>()
         val listOfLineInputStates = mutableListOf<LineUiState>()
 
-        for (i in 1..newLineCount.toInt()) {
+        for (i in 0..newLineCount.toInt() - 1) {
             listOfLines.add(Line(lineNumber = i))
             listOfLineInputStates.add(LineUiState())
         }
@@ -92,7 +110,7 @@ class NewCxViewModel : ViewModel() {
         )}
     }
 
-    private fun onLineCountValidationFailure(newLineCount: String, toastMessage: String?) {
+    private fun onLineCountValidationFailure(newLineCount: String, toastMessage: String? = null) {
         if (toastMessage != null) emitToast(toastMessage)
         _uiState.update { it.copy(
                 lineCount = newLineCount,
@@ -115,7 +133,7 @@ class NewCxViewModel : ViewModel() {
             isByod = currentLineUiState.isByod
         )
 
-        if (currentLineUiState.isByod) mutableListOfLineUiStates[index] = mutableLineUiState.copy(
+        if (currentLineUiState.isByod) mutableLineUiState = mutableLineUiState.copy(
             fullDeviceCost = "",
             promotionAmount = "",
             fairMarketValue = "",
@@ -249,10 +267,10 @@ class NewCxViewModel : ViewModel() {
         }
     }
 
-    fun generateQuote() {
+    fun generateNewCxQuote() {
         _uiState.update { currentState ->
             currentState.copy(
-                quote = currentState.ratePlan?.let { Quote(it, currentState.listOfLines) }
+                newCxQuote = currentState.ratePlan?.let { NewCxQuote(it, currentState.listOfLines) }
             )
         }
     }

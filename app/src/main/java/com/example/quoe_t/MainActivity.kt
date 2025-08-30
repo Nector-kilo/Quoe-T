@@ -16,7 +16,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             QuoeTTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    QuoetAppNavigation()
+                    MainNavigation()
                 }
             }
         }

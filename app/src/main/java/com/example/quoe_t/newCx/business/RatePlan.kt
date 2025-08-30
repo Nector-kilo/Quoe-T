@@ -1,4 +1,4 @@
-package com.example.quoe_t.business
+package com.example.quoe_t.newCx.business
 
 data class RatePlanData(
     val rateName: String,
@@ -7,20 +7,14 @@ data class RatePlanData(
 )
 
 sealed class RatePlan {
-    data object EmptyRatePlan : RatePlan()
     data object ExperienceMore : RatePlan()
     data object ExperienceBeyond : RatePlan()
     data object ExperienceMoreMilRes : RatePlan()
     data object ExperienceBeyondMilRes : RatePlan()
+    data object FourLineOffer : RatePlan()
 
     val data: RatePlanData
         get() = when (this) {
-            EmptyRatePlan -> RatePlanData(
-                rateName = "",
-                ratePricing = listOf(0),
-                isDiscountedRate = false
-            )
-
             ExperienceMore -> RatePlanData(
                 rateName = "Experience More",
                 ratePricing = listOf(85, 140, 170, 200, 230),
@@ -44,6 +38,12 @@ sealed class RatePlan {
                 ratePricing = listOf(85, 130, 165, 200, 235),
                 isDiscountedRate = true
             )
+
+            FourLineOffer -> RatePlanData(
+                rateName = "Four Line Offer",
+                ratePricing = listOf(25, 50, 75, 100, 125),
+                isDiscountedRate = true
+            )
         }
 
     companion object {
@@ -52,7 +52,8 @@ sealed class RatePlan {
                 ExperienceMore,
                 ExperienceBeyond,
                 ExperienceMoreMilRes,
-                ExperienceBeyondMilRes
+                ExperienceBeyondMilRes,
+                FourLineOffer
             )
         }
     }
