@@ -6,12 +6,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -86,45 +86,48 @@ fun NewCxDataScreen(newCxViewModel: NewCxViewModel, onSaveAndCloseClicked: () ->
             }
         }}
     ) { innerPadding ->
-        Column(
+        LazyColumn(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(innerPadding)
         ) {
-            OutlinedCard (
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                modifier = Modifier.padding(2.dp)
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxWidth()
+            item {
+                OutlinedCard(
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                    modifier = Modifier.padding(2.dp)
                 ) {
-                    RatePlanSelectionMenu(
-                        ratePlanName = ratePlanName,
-                        onRatePlanSelection = { newCxViewModel.setRatePlan(it) }
-                    )
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        RatePlanSelectionMenu(
+                            ratePlanName = ratePlanName,
+                            onRatePlanChange = { newCxViewModel.setRatePlan(it) }
+                        )
 
-                    LineCountInputField(
-                        lineCount = lineCount,
-                        isError = uiState.lineCountError,
-                        enabled = uiState.lineCountEnabled,
-                        onLineCountInput = { newCxViewModel.updateLineCount(it) }
-                    )
+                        LineCountInputField(
+                            lineCount = lineCount,
+                            isError = uiState.lineCountError,
+                            enabled = uiState.lineCountEnabled,
+                            onLineCountChange = { newCxViewModel.updateLineCount(it) }
+                        )
+                    }
                 }
             }
-
-            DevicesDataLazyList(
-                lines = uiState.listOfLines,
-                linesUiState = uiState.listOfLinesUiState,
-                onValueChanged = { index, lineUiState ->
-                    newCxViewModel.updateLineUiStates(index, lineUiState)
-                }
-            )
+            item {
+                DevicesDataList(
+                    lines = uiState.listOfLines,
+                    linesUiState = uiState.listOfLinesUiState,
+                    onLineUiChange = { index, lineUiState ->
+                        newCxViewModel.updateLineUiStates(index, lineUiState)
+                    }
+                )
+            }
         }
     }
 }
 
 @Composable
-fun RatePlanSelectionMenu(ratePlanName: String?, onRatePlanSelection: (RatePlan) -> Unit) {
+fun RatePlanSelectionMenu(ratePlanName: String?, onRatePlanChange: (RatePlan) -> Unit) {
     val listOfRatePlans = RatePlan.getAllRatePlans()
     var expanded by remember { mutableStateOf(false) }
     var dropDownWidth by remember { mutableIntStateOf(0) }
@@ -167,7 +170,7 @@ fun RatePlanSelectionMenu(ratePlanName: String?, onRatePlanSelection: (RatePlan)
                 text = { Text(it.data.rateName) },
                 onClick = {
                     expanded = false
-                    onRatePlanSelection(it)
+                    onRatePlanChange(it)
                 }
             )}
         }
@@ -179,12 +182,12 @@ fun LineCountInputField(
     lineCount: String,
     isError: Boolean,
     enabled: Boolean,
-    onLineCountInput: (String) -> Unit
+    onLineCountChange: (String) -> Unit
 ) {
     OutlinedTextField(
         label = { Text("Number of Lines") },
         value = lineCount,
-        onValueChange = { onLineCountInput(it) },
+        onValueChange = { onLineCountChange(it) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         singleLine = true,
         isError = isError,
@@ -194,31 +197,31 @@ fun LineCountInputField(
 }
 
 @Composable
-fun DevicesDataLazyList(
+fun DevicesDataList(
     lines: List<Line>,
     linesUiState: List<LineUiState>,
-    onValueChanged: (index: Int, lineUiState: LineUiState) -> Unit
+    onLineUiChange: (index: Int, lineUiState: LineUiState) -> Unit,
 ) {
-    OutlinedCard (
+    OutlinedCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        modifier = Modifier.fillMaxSize().padding(2.dp)
+        modifier = Modifier.padding(2.dp)
     ) {
         if (lines.isEmpty()) Text(
-                text = "Device data will show here.",
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxSize().padding(vertical = 64.dp)
+            text = "Device data will show here.",
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxSize().padding(vertical = 64.dp)
         ) else {
             Text(
                 text = "Input Device Data",
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
-            LazyColumn(horizontalAlignment = Alignment.CenterHorizontally) {
-                itemsIndexed(items = lines) { index, line ->
+            Column {
+                lines.forEachIndexed { i, line ->
                     DeviceDataItem(
                         line = line,
-                        lineUiState = linesUiState[index],
-                        onLineUiChanged = { onValueChanged(index, it) }
+                        lineUiState = linesUiState[i],
+                        onLineUiChanged = { onLineUiChange(i, it) }
                     )
                 }
             }
@@ -230,7 +233,7 @@ fun DevicesDataLazyList(
 fun DeviceDataItem(line: Line, lineUiState: LineUiState, onLineUiChanged: (LineUiState) -> Unit) {
     Card(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        modifier = Modifier.fillMaxSize().padding(6.dp)
+        modifier = Modifier.padding(6.dp)
     ) {
         Row (verticalAlignment = Alignment.CenterVertically) {
             Text (

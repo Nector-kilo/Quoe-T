@@ -53,108 +53,114 @@ fun HomeScreen(onNewCxClicked: () -> Unit, onExistingCxClicked: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxSize().padding(innerPadding)
         ) {
-            OutlinedCard (
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                modifier = Modifier.padding(6.dp).weight(1f)
-            ) {
-                Card (
-                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                    modifier = Modifier.fillMaxSize().padding(6.dp)
-                ) {
-                    LazyColumn(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(8.dp)) {
-                        item {
-                            Text(
-                                textAlign = TextAlign.Center,
-                                fontSize = 32.sp,
-                                fontStyle = FontStyle.Italic,
-                                text = "\nWelcome to Quoe-T\n"
-                            )
-                            Text(
-                                fontSize = 22.sp,
-                                modifier = Modifier.fillMaxWidth(),
-                                text = "Introduction:"
-                            )
-                            Text(
-                                fontSize = 16.sp,
-                                text = "This is my little pet project to help generate quotes for " +
-                                        "new and existing T-Mobile customers.\n\nThis application " +
-                                        "was written in Kotlin for the Android operating system, " +
-                                        "following a Model-View-ViewModel (MVVM) architectural " +
-                                        "design and utilizing the JetPack Compose framework.\n\nIf " +
-                                        "you're interested in seeing the code, it's public on my " +
-                                        "GitHub:\nhttps://GitHub.com/NicholasGeraci\n\nAll code is " +
-                                        "licensed under the GNU General Public Licence 3.0, so feel " +
-                                        "free to change the code however you like, just make sure " +
-                                        "you follow the GNU GPL guidelines.\n"
-                            )
-                            Text(
-                                fontSize = 22.sp,
-                                modifier = Modifier.fillMaxWidth(),
-                                text = "Disclaimer:"
-                            )
-                            Text(
-                                fontSize = 16.sp,
-                                text = "This program can make mistakes! I am not responsible for " +
-                                        "any misquotes due to the usage of this application within " +
-                                        "a retail environment.\n"
-                            )
-                            Text(
-                                fontSize = 22.sp,
-                                modifier = Modifier.fillMaxWidth(),
-                                text = "Instructions:"
-                            )
-                            Text(
-                                fontSize = 16.sp,
-                                text = "Select either Existing Customer or New Customer.\n"
-                            )
-                            Text(
-                                fontSize = 18.sp,
-                                modifier = Modifier.fillMaxWidth(),
-                                text = "New Customer:"
-                            )
-                            Text(
-                                fontSize = 16.sp,
-                                text = "1) Choose the Rate Plan.\n2) Input the number of " +
-                                        "lines (Maximum is 5).\n3) Fill in the data for the " +
-                                        "new device(s). You will be notified of any errors. " +
-                                        "Note: Not every field needs to have a value, just the " +
-                                        "Number of Lines, and either Cost or BYOD needs to be " +
-                                        "checked.\n4) Select Save & Close.\n5) Present the " +
-                                        "quote to the customer.\n"
-                            )
-                            Text(
-                                fontSize = 18.sp,
-                                modifier = Modifier.fillMaxWidth(),
-                                text = "Existing Customer:"
-                            )
-                            //TODO Implement this documentation and remove the modifier param.
-                            Text(
-                                modifier = Modifier.fillMaxWidth(),
-                                fontSize = 16.sp,
-                                text = "TODO\n"
-                            )
-                            Text(
-                                fontSize = 22.sp,
-                                modifier = Modifier.fillMaxWidth(),
-                                text = "Found a bug?:"
-                            )
-                            Text(
-                                fontSize = 16.sp,
-                                text = "If you find any bugs, please email me directly at:\n" +
-                                        "NicholasAGeraci00@gmail.com\n"
-                            )
-                            Text(
-                                fontSize = 22.sp,
-                                modifier = Modifier.fillMaxWidth(),
-                                text = "Bug Tracker:"
-                            )
-                            Text(
-                                fontSize = 16.sp,
-                                text = "1) Since Existing Customer isn't yet implemented, if the " +
-                                        "user presses the Existing Customer button, they will be " +
-                                        "locked to an empty screen and be forced to restart the " +
-                                        "application."
-                            )
+            LazyColumn(modifier = Modifier.weight(1f)) {
+                item {
+                    OutlinedCard(
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                        modifier = Modifier.padding(6.dp)
+                    ) {
+                        Card(
+                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                            modifier = Modifier.fillMaxSize().padding(6.dp)
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.padding(6.dp)
+                            ) {
+                                Text(
+                                    textAlign = TextAlign.Center,
+                                    fontSize = 32.sp,
+                                    fontStyle = FontStyle.Italic,
+                                    modifier = Modifier,
+                                    text = "\nWelcome to Quoe-T\n"
+                                )
+                                Text(
+                                    fontSize = 22.sp,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = "Introduction:"
+                                )
+                                Text(
+                                    fontSize = 16.sp,
+                                    text = "This is my little pet project to help generate quotes for " +
+                                            "new and existing T-Mobile customers.\n\nThis application " +
+                                            "was written in Kotlin for the Android operating system, " +
+                                            "following a Model-View-ViewModel (MVVM) architectural " +
+                                            "design and utilizing the JetPack Compose framework.\n\nIf " +
+                                            "you're interested in seeing the code, it's public on my " +
+                                            "GitHub:\nhttps://GitHub.com/NicholasGeraci\n\nAll code is " +
+                                            "licensed under the GNU General Public Licence 3.0, so feel " +
+                                            "free to change the code however you like, just make sure " +
+                                            "you follow the GNU GPL guidelines.\n"
+                                )
+                                Text(
+                                    fontSize = 22.sp,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = "Disclaimer:"
+                                )
+                                Text(
+                                    fontSize = 16.sp,
+                                    text = "This program can make mistakes! I am not responsible for " +
+                                            "any misquotes due to the usage of this application within " +
+                                            "a retail environment.\n"
+                                )
+                                Text(
+                                    fontSize = 22.sp,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = "Instructions:"
+                                )
+                                Text(
+                                    fontSize = 16.sp,
+                                    text = "Select either Existing Customer or New Customer.\n"
+                                )
+                                Text(
+                                    fontSize = 18.sp,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = "New Customer:"
+                                )
+                                Text(
+                                    fontSize = 16.sp,
+                                    text = "1) Choose the Rate Plan.\n2) Input the number of " +
+                                            "lines (Maximum is 5).\n3) Fill in the data for the " +
+                                            "new device(s). You will be notified of any errors. " +
+                                            "Note: Not every field needs to have a value, just the " +
+                                            "Number of Lines, and either Cost or BYOD needs to be " +
+                                            "checked.\n4) Select Save & Close.\n5) Present the " +
+                                            "quote to the customer.\n"
+                                )
+                                Text(
+                                    fontSize = 18.sp,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = "Existing Customer:"
+                                )
+                                //TODO Implement this documentation and remove the modifier param.
+                                Text(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    fontSize = 16.sp,
+                                    text = "TODO\n"
+                                )
+                                Text(
+                                    fontSize = 22.sp,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = "Found a bug?:"
+                                )
+                                Text(
+                                    fontSize = 16.sp,
+                                    text = "If you find any bugs, please email me directly at:\n" +
+                                            "NicholasAGeraci00@gmail.com\n"
+                                )
+                                Text(
+                                    fontSize = 22.sp,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    text = "Bug Tracker:"
+                                )
+                                Text(
+                                    fontSize = 16.sp,
+                                    text = "1) Since Existing Customer isn't yet implemented, if the " +
+                                            "user presses the Existing Customer button, they will be " +
+                                            "locked to an empty screen and be forced to restart the " +
+                                            "application."
+                                )
+                            }
                         }
                     }
                 }
