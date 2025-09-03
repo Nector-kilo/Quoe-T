@@ -1,6 +1,5 @@
 # Quoe-T
 
-### Introduction
 This is my little pet project to help generate quotes for new and existing T-Mobile customers. This application was written in Kotlin for the Android operating system,
 following a Model-View-ViewModel (MVVM) architectural design and utilizing the JetPack Compose framework.
 All code is licensed under the GNU General Public Licence 3.0, so feel free to change the code however you like, just make sure 
