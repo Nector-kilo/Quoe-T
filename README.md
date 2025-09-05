@@ -9,7 +9,7 @@ you follow the GNU GPL guidelines.
 1) Make sure you have "Install apps from unknown sources" enabled on your Android device.
 2) Download and run the Quoe-T.apk file to install the app.
 
-## Instructions
+## Usage Instructions
 Select either Existing Customer or New Customer.
 
 ### New Customer
