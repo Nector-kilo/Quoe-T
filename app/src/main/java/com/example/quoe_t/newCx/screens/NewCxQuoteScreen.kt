@@ -63,8 +63,16 @@ fun NewCxQuoteScreen(newCxViewModel: NewCxViewModel, onCloseClicked: () -> Unit)
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                uiState.newCxQuote?.let { BillTotalsCard("Monthly Bill Est:", it.monthlyBill()) }
-                uiState.newCxQuote?.let { BillTotalsCard("One Time Credit:", it.oneTimeBillCredit()) }
+                uiState.newCxQuote?.let { BillTotalsCard(
+                    modifier = Modifier.weight(1f),
+                    text = "Monthly Bill Estimate:",
+                    value = it.monthlyBill()
+                )}
+                uiState.newCxQuote?.let { BillTotalsCard(
+                    modifier = Modifier.weight(1f),
+                    text = "One-Time Bill Credit:",
+                    value = it.oneTimeBillCredit()
+                    )}
             }
             OutlinedCard(
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -99,10 +107,12 @@ fun NewCxQuoteScreen(newCxViewModel: NewCxViewModel, onCloseClicked: () -> Unit)
                                 Text(
                                     text = "Line ${line.lineNumber + 1}",
                                     textAlign = TextAlign.Center,
-                                    modifier = Modifier.fillMaxWidth()
+                                    modifier = Modifier
+                                        .padding(4.dp)
+                                        .fillMaxWidth()
                                 )
                                 ReceiptPrinter(
-                                    item = "Total monthly cost estimate:",
+                                    item = "Total monthly cost:",
                                     cost = line.monthlyDevicePaymentAfterPromo +
                                             line.p360MonthlyPayment
                                 )
@@ -120,7 +130,7 @@ fun NewCxQuoteScreen(newCxViewModel: NewCxViewModel, onCloseClicked: () -> Unit)
                                             cost = line.downPayment
                                         )
                                         ReceiptPrinter(
-                                            item = "Device balance after down payment:",
+                                            item = "Remaining device balance:",
                                             cost = line.totalDeviceBalance
                                         )
                                     }
@@ -135,7 +145,7 @@ fun NewCxQuoteScreen(newCxViewModel: NewCxViewModel, onCloseClicked: () -> Unit)
                                         cost = line.promotionAmount / 24
                                     )
                                     ReceiptPrinter(
-                                        item = "Monthly device payment after credit:",
+                                        item = "New monthly device payment:",
                                         cost = line.monthlyDevicePaymentAfterPromo
                                     )
                                 }
@@ -144,7 +154,7 @@ fun NewCxQuoteScreen(newCxViewModel: NewCxViewModel, onCloseClicked: () -> Unit)
                                     cost = line.p360MonthlyPayment
                                 )
                                 if (line.fairMarketValue != 0f) ReceiptPrinter(
-                                    item = "One time bill credit for trade in:",
+                                    item = "One time bill credit:",
                                     cost = line.fairMarketValue
                                 )
                             }
@@ -157,10 +167,10 @@ fun NewCxQuoteScreen(newCxViewModel: NewCxViewModel, onCloseClicked: () -> Unit)
 }
 
 @Composable
-fun BillTotalsCard(text: String, value: Float) {
+fun BillTotalsCard(modifier: Modifier = Modifier, text: String, value: Float) {
     OutlinedCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        modifier = Modifier.padding(6.dp)
+        modifier = modifier.padding(6.dp)
     ) {
         Card(
             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
@@ -171,10 +181,16 @@ fun BillTotalsCard(text: String, value: Float) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.padding(vertical = 32.dp, horizontal = 8.dp)
             ) {
-                Text(text = text, fontSize = 22.sp)
+                Text(
+                    text = text,
+                    fontSize = 22.sp,
+                    textAlign = TextAlign.Center,
+                    maxLines = 2
+                )
                 Text(
                     text = "$" + String.format(Locale.US, "%.2f", value),
                     fontSize = 30.sp,
+                    maxLines = 1,
                     modifier = Modifier.padding(8.dp)
                 )
             }

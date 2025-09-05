@@ -316,7 +316,10 @@ fun DeviceDataItem(line: Line, lineUiState: LineUiState, onLineUiChanged: (LineU
 
                 Row {
                     Column(modifier = Modifier.weight(1f).padding(4.dp)) {
-                        Text(text = "Balance after promo")
+                        Text(
+                            text = "Device balance:",
+                            maxLines = 1
+                        )
                         Text(text = "$" + String.format(
                             Locale.US, "%.2f",
                             line.deviceBalanceAfterPromo
@@ -324,7 +327,10 @@ fun DeviceDataItem(line: Line, lineUiState: LineUiState, onLineUiChanged: (LineU
                     }
 
                     Column(modifier = Modifier.weight(1f).padding(4.dp)) {
-                        Text(text = "Total monthly cost")
+                        Text(
+                            text = "Monthly cost:",
+                            maxLines = 1
+                        )
                         Text(text = "$" + String.format(
                             Locale.US, "%.2f",
                             line.monthlyDevicePaymentAfterPromo + line.p360MonthlyPayment

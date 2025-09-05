@@ -24,6 +24,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -39,13 +40,13 @@ fun HomeScreen(onNewCxClicked: () -> Unit, onExistingCxClicked: () -> Unit) {
                     onClick = { onExistingCxClicked() },
                     shape = RoundedCornerShape(4.dp),
                     modifier = Modifier.weight(1f).padding(4.dp)
-                ) { Text("Existing Customer") }
+                ) { Text("Existing Customer", maxLines = 1, overflow = TextOverflow.Ellipsis) }
 
                 Button(
                     onClick = { onNewCxClicked() },
                     shape = RoundedCornerShape(4.dp),
                     modifier = Modifier.weight(1f).padding(4.dp)
-                ) { Text("New Customer") }
+                ) { Text("New Customer", maxLines = 1, overflow = TextOverflow.Ellipsis) }
             }
         }}
     ) { innerPadding ->
