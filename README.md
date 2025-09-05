@@ -5,6 +5,10 @@ following a Model-View-ViewModel (MVVM) architectural design and utilizing the J
 All code is licensed under the GNU General Public Licence 3.0, so feel free to change the code however you like, just make sure 
 you follow the GNU GPL guidelines.
 
+## Mobile Installation
+1) Make sure you have "Install apps from unknown sources" enabled on your Android device.
+2) Download and run the Quoe-T.apk file to install the app.
+
 ## Instructions
 Select either Existing Customer or New Customer.
 
