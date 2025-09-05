@@ -45,40 +45,58 @@ fun NewCxQuoteScreen(newCxViewModel: NewCxViewModel, onCloseClicked: () -> Unit)
                 Button(
                     onClick = { onCloseClicked() },
                     shape = RoundedCornerShape(4.dp),
-                    modifier = Modifier.fillMaxWidth().padding(8.dp)
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .fillMaxWidth()
                 ) { Text("Close") }
             }
         }}
     ) { innerPadding ->
-        Column (
+        Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth().padding(innerPadding)
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxWidth()
         ) {
-            Row (
+            Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 uiState.newCxQuote?.let { BillTotalsCard("Monthly Bill Est:", it.monthlyBill()) }
-                uiState.newCxQuote?.let {BillTotalsCard("One-Time Credit:", it.oneTimeBillCredit()) }
+                uiState.newCxQuote?.let { BillTotalsCard("One Time Credit:", it.oneTimeBillCredit()) }
             }
-            OutlinedCard (
+            OutlinedCard(
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 modifier = Modifier.padding(6.dp)
             ) {
-                Text (
-                    text = "Detailed Device Summary",
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                OutlinedCard(
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                    modifier = Modifier.padding(6.dp)
+                ) {
+                    Card(
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                        modifier = Modifier.padding(6.dp)
+                    ) {
+                        Text(
+                            text = "Detailed Device Summary",
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .fillMaxWidth()
+                        )
+                    }
+                }
                 LazyColumn {
                     itemsIndexed(uiState.listOfLines) { _, line ->
-                        Card (
+                        Card(
                             elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                            modifier = Modifier.fillMaxSize().padding(6.dp)
+                            modifier = Modifier
+                                .padding(6.dp)
+                                .fillMaxSize()
                         ) {
-                            Column (modifier = Modifier.padding(4.dp)) {
-                                Text (
+                            Column(modifier = Modifier.padding(4.dp)) {
+                                Text(
                                     text = "Line ${line.lineNumber + 1}",
                                     textAlign = TextAlign.Center,
                                     modifier = Modifier.fillMaxWidth()
@@ -144,16 +162,22 @@ fun BillTotalsCard(text: String, value: Float) {
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         modifier = Modifier.padding(6.dp)
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(vertical = 32.dp, horizontal = 8.dp)
+        Card(
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+            modifier = Modifier
+                .padding(6.dp)
         ) {
-            Text(text = text, fontSize = 22.sp)
-            Text(
-                text = "$" + String.format(Locale.US, "%.2f", value),
-                fontSize = 30.sp,
-                modifier = Modifier.padding(8.dp)
-            )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(vertical = 32.dp, horizontal = 8.dp)
+            ) {
+                Text(text = text, fontSize = 22.sp)
+                Text(
+                    text = "$" + String.format(Locale.US, "%.2f", value),
+                    fontSize = 30.sp,
+                    modifier = Modifier.padding(8.dp)
+                )
+            }
         }
     }
 }
@@ -167,7 +191,9 @@ fun ReceiptPrinter(item: String, cost: Float = 0f, text: String? = null) {
         Text(text = item)
         Text(
             text = ".".repeat(150),
-            modifier = Modifier.weight(1f).padding(horizontal = 4.dp),
+            modifier = Modifier
+                .padding(horizontal = 4.dp)
+                .weight(1f),
             textAlign = TextAlign.Center,
             overflow = TextOverflow.Clip,
             maxLines = 1

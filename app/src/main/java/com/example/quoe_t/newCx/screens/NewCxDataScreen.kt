@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -90,8 +89,7 @@ fun NewCxDataScreen(newCxViewModel: NewCxViewModel, onSaveAndCloseClicked: () ->
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(innerPadding)
         ) {
-            item {
-                OutlinedCard(
+            item { OutlinedCard(
                     elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                     modifier = Modifier.padding(2.dp)
                 ) {
@@ -113,15 +111,13 @@ fun NewCxDataScreen(newCxViewModel: NewCxViewModel, onSaveAndCloseClicked: () ->
                     }
                 }
             }
-            item {
-                DevicesDataList(
+            item { DevicesDataList(
                     lines = uiState.listOfLines,
                     linesUiState = uiState.listOfLinesUiState,
                     onLineUiChange = { index, lineUiState ->
                         newCxViewModel.updateLineUiStates(index, lineUiState)
                     }
-                )
-            }
+            )}
         }
     }
 }
@@ -132,8 +128,7 @@ fun RatePlanSelectionMenu(ratePlanName: String?, onRatePlanChange: (RatePlan) ->
     var expanded by remember { mutableStateOf(false) }
     var dropDownWidth by remember { mutableIntStateOf(0) }
 
-    Column {
-        OutlinedTextField(
+    Column { OutlinedTextField(
             label = { Text("Rate Plan") },
             value = ratePlanName ?: "",
             onValueChange = {},
@@ -211,11 +206,21 @@ fun DevicesDataList(
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxSize().padding(vertical = 64.dp)
         ) else {
-            Text(
-                text = "Input Device Data",
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
+            OutlinedCard(
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                modifier = Modifier.padding(6.dp)
+            ) {
+                Card(
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+                    modifier = Modifier.padding(6.dp)
+                ) {
+                    Text(
+                        text = "Input Device Data",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
             Column {
                 lines.forEachIndexed { i, line ->
                     DeviceDataItem(
