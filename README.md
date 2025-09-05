@@ -7,7 +7,7 @@ you follow the GNU GPL guidelines.
 
 ## Mobile Installation
 1) Make sure you have "Install apps from unknown sources" enabled on your Android device.
-2) Download and run the Quoe-T.apk file to install the app: https://github.com/NicholasGeraci/Quoe-T/raw/refs/heads/master/Quoe-T.apk
+2) Download and run the [Quoe-T.apk](https://github.com/NicholasGeraci/Quoe-T/raw/refs/heads/master/Quoe-T.apk) file to install the app.
 
 ## Usage Instructions
 Select either Existing Customer or New Customer.
